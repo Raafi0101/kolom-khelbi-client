@@ -59,8 +59,8 @@ export default function App() {
                 <Physics
                     gravity={[0, -9.81, 0]}
                     defaultContactMaterial={{
-                        restitution: 0.55, // Balanced, realistic plastic pen impact
-                        friction: 0.28,    // Natural wooden desk friction
+                        restitution: 0.12, // low bounce for realistic pen impact
+                        friction: 0.6,    // higher friction for wooden desk feel
                         contactEquationStiffness: 1e7,
                         contactEquationRelaxation: 2,
                     }}
