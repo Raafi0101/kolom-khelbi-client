@@ -43,7 +43,7 @@ export function startLocalGame(options = {}) {
     })
 }
 
-
+export function startSoloGame(options = {}) {
     if (nextRoundTimer) {
         clearTimeout(nextRoundTimer)
         nextRoundTimer = null
@@ -56,6 +56,7 @@ export function startLocalGame(options = {}) {
 
     setState({
         soloMode: true,
+        localMode: false,
         difficulty,
         targetPoints: Math.min(20, Math.max(2, targetPoints)),
         scores: { P1: 0, P2: 0 },
@@ -77,6 +78,10 @@ export function startLocalGame(options = {}) {
         error: null,
     })
 }
+
+
+
+
 
 export function startNextRound() {
     if (nextRoundTimer) {
