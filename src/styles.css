@@ -760,3 +760,87 @@ canvas {
 .hud .badge { background: #374151; padding: 2px 6px; border-radius: 999px; font-size: 10px; }
 .hud .turn { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); font-weight: 600; }
 .hud .turn.mine { color: #4ade80; }
+
+/* ---------- Mobile Responsive Enhancements ---------- */
+@media (max-width: 480px) {
+  /* Lobby Card adjustments */
+  .lobby-card {
+    padding: 16px 12px;
+    max-width: 100%;
+  }
+
+  /* Pen selection grid - two columns for easier tap */
+  .pen-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .pen-card {
+    padding: 10px 8px;
+  }
+
+  .pen-name {
+    font-size: 12px;
+  }
+
+  .pen-badge {
+    font-size: 9px;
+  }
+
+  /* Buttons and tabs larger touch targets */
+  .tab-btn,
+  .step-btn,
+  .quick-pt-btn,
+  .diff-tab {
+    font-size: 14px;
+    padding: 12px;
+    min-height: 44px;
+  }
+
+  .step-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .points-slider {
+    height: 8px;
+  }
+
+  .quick-points {
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: space-between;
+  }
+
+  .quick-pt-btn {
+    flex: 0 0 48%;
+    padding: 8px 0;
+  }
+
+  .start-game-btn {
+    padding: 16px;
+    font-size: 16px;
+  }
+
+  /* Text inputs larger for touch */
+  .text-input {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+
+  .config-label {
+    font-size: 14px;
+  }
+}
+
+/* Subtle elevation for selected pen */
+.pen-card.selected {
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+/* Add gentle hover feedback */
+.pen-card:hover {
+  transform: scale(1.02);
+  transition: transform 0.15s ease;
+}
+

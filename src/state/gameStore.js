@@ -12,6 +12,7 @@ let state = {
     players: null,
     dragging: false,
     error: null,
+    localMode: false,
     soloMode: false,
     difficulty: 'medium',
     targetPoints: 5,

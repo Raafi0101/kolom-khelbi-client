@@ -21,8 +21,8 @@ export default function Pen({
         args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
         position,
         rotation: [0, rotationY, 0],
-        material: { friction: 0.28, restitution: 0.52 }, // Realistic wood-plastic contact
-        linearDamping: 0.24, // Naturally decelerates on wooden desk instead of sliding endlessly
+        material: { friction: 0.28, restitution: 0.2 }, // Reduced bounce for realism
+        linearDamping: 0.5, // Faster deceleration for realistic motion
         angularDamping: 0.32, // Controlled realistic spin
         allowSleep: true,
         sleepSpeedLimit: 0.1,

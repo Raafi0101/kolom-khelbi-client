@@ -8,7 +8,42 @@ import {
 
 let nextRoundTimer = null
 
-export function startSoloGame(options = {}) {
+export function startLocalGame(options = {}) {
+    if (nextRoundTimer) {
+        clearTimeout(nextRoundTimer)
+        nextRoundTimer = null
+    }
+
+    const difficulty = typeof options === 'string' ? options : options.difficulty || 'medium'
+    const targetPoints = typeof options === 'object' && options.targetPoints ? options.targetPoints : 5
+    const selectedPen = typeof options === 'object' && options.selectedPen ? options.selectedPen : 'pinpoint'
+
+    setState({
+        localMode: true,
+        soloMode: false,
+        difficulty,
+        targetPoints: Math.min(20, Math.max(2, targetPoints)),
+        scores: { P1: 0, P2: 0 },
+        roundNumber: 1,
+        roundWinner: null,
+        roundStatus: 'PLAYING',
+        phase: 'IN_PROGRESS',
+        currentTurn: 'P1',
+        winner: null,
+        turnNumber: 0,
+        mySlot: 'P1',
+        aiSlot: 'P2',
+        roomId: 'LOCAL',
+        myPlayerId: 'human',
+        selectedPen,
+        aiPen: null,
+        players: null,
+        dragging: false,
+        error: null,
+    })
+}
+
+
     if (nextRoundTimer) {
         clearTimeout(nextRoundTimer)
         nextRoundTimer = null
