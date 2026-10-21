@@ -21,12 +21,14 @@ export default function Pen({
         args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
         position,
         rotation: [0, rotationY, 0],
-        material: { friction: 0.28, restitution: 0.2 }, // Reduced bounce for realism
-        linearDamping: 0.5, // Faster deceleration for realistic motion
-        angularDamping: 0.32, // Controlled realistic spin
-        allowSleep: true,
-        sleepSpeedLimit: 0.1,
-        sleepTimeLimit: 0.4,
+        material: { friction: 0.35, restitution: 0.05 }, // realistic table interaction, low bounce
+        linearDamping: 0.2, // moderate deceleration
+        angularDamping: 0.08, // low damping for noticeable spin
+        angularFactor: [0, 1, 0], // only yaw rotation (around Y axis)
+    linearFactor: [1, 0, 1], // constrain vertical movement
+    allowSleep: true,
+        sleepSpeedLimit: 0.2,
+        sleepTimeLimit: 0.5,
         onCollide: (e) => {
             const vel = e.contact?.impactVelocity || 0.8
             playClashSound(Math.min(1, vel / 2.5))
