@@ -133,7 +133,7 @@ export default function Scene() {
         }
     }, [state.soloMode, state.roundNumber, state.roundStatus, state.turnNumber, resetPensToTable])
 
-    // Pointer Down on Pen
+    // Pointer Down on Pen (Works seamlessly on Mobile Touch & Desktop Mouse)
     const onPenDown = (slot) => (e) => {
         if (!isHumanTurn || slot !== humanSlot || pending) return
         const ref = slot === 'P1' ? p1 : p2
@@ -180,7 +180,7 @@ export default function Scene() {
             setPending({ dirX: dir.x, dirZ: dir.z, power, seq: Date.now() })
         }
 
-        window.addEventListener('pointermove', onMove)
+        window.addEventListener('pointermove', onMove, { passive: true })
         window.addEventListener('pointerup', onUp)
         window.addEventListener('pointercancel', onUp)
         return () => {
@@ -336,7 +336,7 @@ export default function Scene() {
 
     return (
         <>
-            {/* Table & Camera are completely FIXED (OrbitControls disabled so board never moves) */}
+            {/* Table & Camera are completely FIXED (OrbitControls locked so board never moves) */}
             <OrbitControls
                 makeDefault
                 target={[0, 0, 0]}
@@ -371,8 +371,7 @@ export default function Scene() {
 
 /**
  * 360-Degree Aiming Visualizer:
- * Shows a forward trajectory arrow pointing in the exact shooting direction,
- * an arrowhead, a slingshot pull line, and a glowing base ring.
+ * Clear, thick, vibrant trajectory arrow visible under thumbs on mobile phones.
  */
 function AimTrajectoryGuide({ from, to }) {
     const delta = from.clone().sub(to)
@@ -383,8 +382,8 @@ function AimTrajectoryGuide({ from, to }) {
     const dir = delta.clone().normalize()
     const power = Math.min(1, Math.max(0.15, len / MAX_DRAG_WORLD))
 
-    // Arrow length proportional to power (up to 0.85m)
-    const arrowLen = 0.2 + power * 0.65
+    // Arrow length proportional to power (up to 0.9m)
+    const arrowLen = 0.22 + power * 0.68
     const angle = Math.atan2(dir.x, dir.z)
 
     // Dynamic color based on power
@@ -410,28 +409,28 @@ function AimTrajectoryGuide({ from, to }) {
 
     return (
         <group position={[0, 0.045, 0]}>
-            {/* 1. Forward Trajectory Shaft */}
+            {/* 1. Forward Trajectory Shaft (Thick for mobile visibility) */}
             <mesh position={[shaftMidX, 0, shaftMidZ]} rotation={[0, angle, 0]}>
-                <cylinderGeometry args={[0.014, 0.014, arrowLen, 12]} />
+                <cylinderGeometry args={[0.018, 0.018, arrowLen, 12]} />
                 <meshBasicMaterial color={color} />
             </mesh>
 
             {/* 2. Forward Arrowhead Cone */}
             <mesh position={[tipX, 0, tipZ]} rotation={[0, angle, 0]}>
-                <coneGeometry args={[0.04, 0.08, 16]} />
+                <coneGeometry args={[0.05, 0.10, 16]} />
                 <meshBasicMaterial color={color} />
             </mesh>
 
             {/* 3. Slingshot Pull Line (Behind Pen) */}
             <mesh position={[pullMidX, 0, pullMidZ]} rotation={[0, pullAngle, 0]}>
-                <cylinderGeometry args={[0.006, 0.006, len, 8]} />
-                <meshBasicMaterial color="rgba(255,255,255,0.6)" transparent opacity={0.6} />
+                <cylinderGeometry args={[0.008, 0.008, len, 8]} />
+                <meshBasicMaterial color="rgba(255,255,255,0.7)" transparent opacity={0.7} />
             </mesh>
 
             {/* 4. Glowing Power Ring at Pen Base */}
             <mesh position={[from.x, -0.01, from.z]} rotation={[-Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[0.07, 0.09 + power * 0.04, 24]} />
-                <meshBasicMaterial color={color} transparent opacity={0.7} />
+                <ringGeometry args={[0.07, 0.11 + power * 0.04, 24]} />
+                <meshBasicMaterial color={color} transparent opacity={0.75} />
             </mesh>
         </group>
     )

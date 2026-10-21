@@ -79,6 +79,12 @@ export default function Pen({
 
     return (
         <group ref={ref} onPointerDown={onPointerDown} dispose={null}>
+            {/* Enlarged touch target for mobile phones (invisible proxy mesh) */}
+            <mesh visible={false} position={[0, 0, 0]}>
+                <boxGeometry args={[PEN_LENGTH * 1.4, 0.26, 0.26]} />
+                <meshBasicMaterial transparent opacity={0} />
+            </mesh>
+
             {/* 1. Main Barrel (Body) */}
             <mesh position={[-0.04, 0, 0]} rotation={rotX} castShadow receiveShadow>
                 <cylinderGeometry args={[PEN_RADIUS * 0.95, PEN_RADIUS * 0.95, 0.22, 24]} />

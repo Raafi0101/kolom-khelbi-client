@@ -1,4 +1,4 @@
-// Web Audio API Synthesizer - 100% self-contained procedural sound effects
+// Web Audio API Synthesizer with Mobile Haptic Feedback
 
 let audioCtx = null
 
@@ -15,8 +15,20 @@ function getAudioContext() {
     return audioCtx
 }
 
-// 1. Pen Flick / Slingshot release sound (whoosh + snap)
+// Mobile Haptic Feedback helper
+function triggerHaptic(pattern) {
+    try {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(pattern)
+        }
+    } catch {
+        // ignore unsupported
+    }
+}
+
+// 1. Pen Flick / Slingshot release sound + haptic tap
 export function playFlickSound(power = 0.5) {
+    triggerHaptic(Math.round(15 + power * 20))
     try {
         const ctx = getAudioContext()
         if (!ctx) return
@@ -65,8 +77,9 @@ export function playFlickSound(power = 0.5) {
     }
 }
 
-// 2. Pen-to-Pen / Pen-to-Table clash sound (sharp solid clack)
+// 2. Pen-to-Pen clash sound + solid haptic impact
 export function playClashSound(intensity = 0.5) {
+    triggerHaptic(Math.round(20 + intensity * 35))
     try {
         const ctx = getAudioContext()
         if (!ctx) return
@@ -92,8 +105,9 @@ export function playClashSound(intensity = 0.5) {
     }
 }
 
-// 3. Fall off table sound (descending whistle / thud)
+// 3. Fall off table sound + double rumble
 export function playFallSound() {
+    triggerHaptic([40, 30, 40])
     try {
         const ctx = getAudioContext()
         if (!ctx) return
@@ -117,8 +131,9 @@ export function playFallSound() {
     }
 }
 
-// 4. Round Won point chime (bright pleasant bell)
+// 4. Round Won point chime
 export function playPointSound() {
+    triggerHaptic([25, 40, 50])
     try {
         const ctx = getAudioContext()
         if (!ctx) return
@@ -145,8 +160,9 @@ export function playPointSound() {
     }
 }
 
-// 5. Match Victory celebration fanfare (happy arpeggio)
+// 5. Match Victory celebration fanfare
 export function playVictorySound() {
+    triggerHaptic([60, 40, 60, 40, 100])
     try {
         const ctx = getAudioContext()
         if (!ctx) return
@@ -173,8 +189,9 @@ export function playVictorySound() {
     }
 }
 
-// 6. Defeat sound (minor cadence)
+// 6. Defeat sound
 export function playDefeatSound() {
+    triggerHaptic([80, 50, 80])
     try {
         const ctx = getAudioContext()
         if (!ctx) return

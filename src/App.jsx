@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Scene from './game/Scene.jsx'
 import Lobby from './ui/Lobby.jsx'
 import HUD from './ui/HUD.jsx'
@@ -11,6 +11,15 @@ import './styles.css'
 
 export default function App() {
     const state = useGameStore()
+    const [aspect, setAspect] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth / window.innerHeight : 1.6
+    )
+
+    useEffect(() => {
+        const onResize = () => setAspect(window.innerWidth / window.innerHeight)
+        window.addEventListener('resize', onResize)
+        return () => window.removeEventListener('resize', onResize)
+    }, [])
 
     useEffect(() => {
         if (!state.soloMode) {
@@ -29,11 +38,16 @@ export default function App() {
         )
     }
 
+    // Responsive Mobile Camera: lifts higher in mobile portrait so full table fits on any phone
+    const isPortrait = aspect < 1.0
+    const cameraPos = isPortrait ? [0, 3.45, 1.85] : [0, 2.35, 1.35]
+    const cameraFov = isPortrait ? 54 : 42
+
     return (
         <div className="app">
             <Canvas shadows dpr={[1, 2]}>
-                {/* Fixed, rock-solid camera viewing the board */}
-                <PerspectiveCamera makeDefault position={[0, 2.35, 1.4]} fov={44} />
+                {/* Mobile-Adaptive fixed perspective camera */}
+                <PerspectiveCamera makeDefault position={cameraPos} fov={cameraFov} />
                 <ambientLight intensity={0.55} />
                 <directionalLight
                     position={[3, 5, 2.5]}
