@@ -51,7 +51,7 @@ export function startNextRound() {
 
     const s = getState()
     const nextRound = s.roundNumber + 1
-    // Winner of previous round starts the next round (classic rule)
+    // The player who won the previous round takes the first turn in next round
     const nextShooter = s.roundWinner || 'P1'
 
     setState({
@@ -60,7 +60,7 @@ export function startNextRound() {
         roundWinner: null,
         phase: 'IN_PROGRESS',
         currentTurn: nextShooter,
-        turnNumber: 0, // signals Scene to reset physics bodies
+        turnNumber: 0, // Signals Scene to reset pens to table
         dragging: false,
     })
 }
@@ -74,11 +74,11 @@ export function applyShotResult({ shooterSlot, shooterOnTable, opponentOnTable }
     let roundWinner = null
 
     if (!shooterOnTable) {
-        // Initiator falls off - opponent wins round (even if both fall)
+        // Initiator fell off table -> Opponent wins point (even if both fall)
         roundEnded = true
         roundWinner = oppSlot
     } else if (!opponentOnTable) {
-        // Opponent knocked off table - shooter wins round
+        // Opponent knocked off table -> Shooter wins point
         roundEnded = true
         roundWinner = shooterSlot
     }
@@ -93,7 +93,7 @@ export function applyShotResult({ shooterSlot, shooterOnTable, opponentOnTable }
         const target = s.targetPoints || 5
 
         if (newScore >= target) {
-            // Match is officially won!
+            // Target points reached -> Match Over!
             if (roundWinner === 'P1') {
                 playVictorySound()
             } else {
@@ -109,7 +109,7 @@ export function applyShotResult({ shooterSlot, shooterOnTable, opponentOnTable }
                 turnNumber: nextTurnNumber,
             })
         } else {
-            // Round finished, proceed to next round
+            // Round finished -> Point awarded, pens will return for next round
             setState({
                 scores: updatedScores,
                 roundStatus: 'ROUND_OVER',
@@ -117,16 +117,16 @@ export function applyShotResult({ shooterSlot, shooterOnTable, opponentOnTable }
                 turnNumber: nextTurnNumber,
             })
 
-            // Automatically advance to next round after 2.4 seconds
+            // Automatically bring pens back and start next round after 1.4s
             if (nextRoundTimer) clearTimeout(nextRoundTimer)
             nextRoundTimer = setTimeout(() => {
                 if (getState().roundStatus === 'ROUND_OVER') {
                     startNextRound()
                 }
-            }, 2400)
+            }, 1400)
         }
     } else {
-        // Both pens remain on table, continue turn alternation
+        // Both pens still safely on table -> alternate turns
         setState({
             currentTurn: oppSlot,
             turnNumber: nextTurnNumber,

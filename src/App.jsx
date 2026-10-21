@@ -32,16 +32,17 @@ export default function App() {
     return (
         <div className="app">
             <Canvas shadows dpr={[1, 2]}>
-                <PerspectiveCamera makeDefault position={[0, 2.4, 2.4]} fov={42} />
-                <ambientLight intensity={0.45} />
+                {/* Fixed, stable camera viewing the board perfectly */}
+                <PerspectiveCamera makeDefault position={[0, 2.35, 1.4]} fov={44} />
+                <ambientLight intensity={0.55} />
                 <directionalLight
                     position={[3, 5, 2.5]}
-                    intensity={1.3}
+                    intensity={1.4}
                     castShadow
                     shadow-mapSize={[2048, 2048]}
                 />
-                <directionalLight position={[-3, 4, -2]} intensity={0.35} color="#88aaff" />
-                <Physics gravity={[0, -9.81, 0]} defaultContactMaterial={{ restitution: 0.2, friction: 0.5 }}>
+                <directionalLight position={[-3, 4, -2]} intensity={0.4} color="#88aaff" />
+                <Physics gravity={[0, -9.81, 0]} defaultContactMaterial={{ restitution: 0.25, friction: 0.5 }}>
                     <Scene />
                 </Physics>
             </Canvas>
