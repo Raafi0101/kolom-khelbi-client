@@ -15,20 +15,21 @@ export default function Pen({
     const penStyle = PEN_STYLES[styleId] || PEN_STYLES.pinpoint
     const barrelColor = customColor || penStyle.barrelColor
 
+    // Highly responsive physics body with realistic momentum transfer & smooth slide
     const [ref, api] = useBox(() => ({
-        mass: 0.3,
+        mass: 0.32,
         args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
         position,
         rotation: [0, rotationY, 0],
-        material: { friction: 0.4, restitution: 0.25 },
-        linearDamping: 0.25,
-        angularDamping: 0.4,
+        material: { friction: 0.08, restitution: 0.82 }, // Low friction slide + high elastic bounce
+        linearDamping: 0.12, // Smooth desktop gliding without abrupt stopping
+        angularDamping: 0.18, // Realistic spin when hit off-center
         allowSleep: true,
-        sleepSpeedLimit: 0.15,
-        sleepTimeLimit: 0.6,
+        sleepSpeedLimit: 0.1,
+        sleepTimeLimit: 0.4,
         onCollide: (e) => {
             const vel = e.contact?.impactVelocity || 1.2
-            playClashSound(Math.min(1, vel / 3))
+            playClashSound(Math.min(1, vel / 3.5))
         },
     }))
 
@@ -73,7 +74,7 @@ export default function Pen({
         }
     }, [api, onReady])
 
-    // Cylinder rotation to align along X-axis
+    // Cylinder rotation to align along the physics box axis
     const rotX = [0, 0, Math.PI / 2]
 
     return (
@@ -148,7 +149,6 @@ export default function Pen({
 
             {/* 7. Realistic Pocket Clip */}
             <group position={[-0.10, PEN_RADIUS * 1.15, 0]}>
-                {/* Clip body */}
                 <mesh position={[0, 0.004, 0]} castShadow>
                     <boxGeometry args={[0.10, 0.006, 0.014]} />
                     <meshStandardMaterial
@@ -157,7 +157,6 @@ export default function Pen({
                         roughness={0.25}
                     />
                 </mesh>
-                {/* Clip attachment mount to cap */}
                 <mesh position={[-0.05, -0.004, 0]} castShadow>
                     <boxGeometry args={[0.012, 0.016, 0.014]} />
                     <meshStandardMaterial
@@ -166,7 +165,6 @@ export default function Pen({
                         roughness={0.3}
                     />
                 </mesh>
-                {/* Clip curved tip */}
                 <mesh position={[0.052, 0.008, 0]} castShadow>
                     <sphereGeometry args={[0.006, 12, 12]} />
                     <meshStandardMaterial

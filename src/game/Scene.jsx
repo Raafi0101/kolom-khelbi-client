@@ -4,7 +4,7 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import Table from './Table.jsx'
 import Pen from './Pen.jsx'
-import { P1_START, P2_START } from './constants.js'
+import { P1_START, P2_START, P1_ROT_Y, P2_ROT_Y } from './constants.js'
 import { useGameStore, setState, getState } from '../state/gameStore.js'
 import { sendShot } from '../net/socket.js'
 import { applyShotResult } from '../state/localGame.js'
@@ -12,7 +12,7 @@ import { computeAIShot } from '../ai/computerAI.js'
 import { playFlickSound } from '../audio/soundEffects.js'
 
 const MAX_DRAG_WORLD = 1.0
-const MAX_IMPULSE = 2.6
+const MAX_IMPULSE = 3.2
 const TABLE_BOUND_X = 1.22
 const TABLE_BOUND_Z = 0.72
 const TABLE_MIN_Y = -0.03
@@ -104,20 +104,20 @@ export default function Scene() {
         [camera, size]
     )
 
-    // Reset pens back onto table with 0 velocity
+    // Reset pens back onto table in parallel I - I orientation
     const resetPensToTable = useCallback(() => {
         const a1 = p1.current?.api
         const a2 = p2.current?.api
         if (!a1 || !a2) return
 
         a1.position.set(P1_START[0], P1_START[1], P1_START[2])
-        const q1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0)
+        const q1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), P1_ROT_Y)
         a1.quaternion.set(q1.x, q1.y, q1.z, q1.w)
         a1.velocity.set(0, 0, 0)
         a1.angularVelocity.set(0, 0, 0)
 
         a2.position.set(P2_START[0], P2_START[1], P2_START[2])
-        const q2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)
+        const q2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), P2_ROT_Y)
         a2.quaternion.set(q2.x, q2.y, q2.z, q2.w)
         a2.velocity.set(0, 0, 0)
         a2.angularVelocity.set(0, 0, 0)
@@ -266,7 +266,7 @@ export default function Scene() {
             const on1 = isPenOnTable(sp1)
             const on2 = isPenOnTable(sp2)
 
-            // CRITICAL: If either pen has fallen off table, resolve immediately without waiting for free-fall to stop
+            // If either pen has fallen off table, resolve immediately
             if (!on1 || !on2) {
                 if (!on1) {
                     a1.velocity.set(0, 0, 0)
@@ -347,16 +347,17 @@ export default function Scene() {
 
             <Table />
 
+            {/* Parallel I - I Pen starting positions */}
             <Pen
                 position={P1_START}
-                rotationY={0}
+                rotationY={P1_ROT_Y}
                 styleId={state.selectedPen || 'pinpoint'}
                 onReady={(api) => (p1.current = { api })}
                 onPointerDown={onPenDown('P1')}
             />
             <Pen
                 position={P2_START}
-                rotationY={Math.PI}
+                rotationY={P2_ROT_Y}
                 styleId={state.aiPen || 'all_time_blue'}
                 onReady={(api) => (p2.current = { api })}
                 onPointerDown={onPenDown('P2')}

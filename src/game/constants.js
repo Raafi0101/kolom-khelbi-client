@@ -5,3 +5,5 @@ export const PEN_RADIUS = 0.024
 export const PEN_REST_Y = 0.035
 export const P1_START = [-0.60, 0.035, 0]
 export const P2_START = [0.60, 0.035, 0]
+export const P1_ROT_Y = Math.PI / 2
+export const P2_ROT_Y = Math.PI / 2

@@ -2,12 +2,12 @@ import { useBox } from '@react-three/cannon'
 import { TABLE_WIDTH, TABLE_LENGTH } from './constants.js'
 
 export default function Table() {
-    // Static Cannon.js physics box for the table top
+    // Static wooden tabletop with smooth glide
     const [ref] = useBox(() => ({
         type: 'Static',
         args: [TABLE_WIDTH, 0.1, TABLE_LENGTH],
         position: [0, -0.05, 0],
-        material: { friction: 0.55, restitution: 0.2 },
+        material: { friction: 0.08, restitution: 0.6 },
     }))
 
     const legHeight = 1.2
@@ -21,8 +21,8 @@ export default function Table() {
             <mesh ref={ref} receiveShadow>
                 <boxGeometry args={[TABLE_WIDTH, 0.1, TABLE_LENGTH]} />
                 <meshStandardMaterial
-                    color="#854d0e" // Rich warm teak/walnut wood
-                    roughness={0.4}
+                    color="#854d0e" // Warm teak/walnut wood
+                    roughness={0.35}
                     metalness={0.05}
                 />
             </mesh>
@@ -31,8 +31,8 @@ export default function Table() {
             <mesh position={[0, -0.05, 0]} receiveShadow>
                 <boxGeometry args={[TABLE_WIDTH + 0.04, 0.09, TABLE_LENGTH + 0.04]} />
                 <meshStandardMaterial
-                    color="#451a03" // Deep mahogany dark wood border
-                    roughness={0.5}
+                    color="#451a03" // Deep mahogany border
+                    roughness={0.45}
                     metalness={0.1}
                 />
             </mesh>
@@ -41,8 +41,8 @@ export default function Table() {
             <mesh position={[0, 0.001, 0]} receiveShadow>
                 <boxGeometry args={[TABLE_WIDTH - 0.06, 0.002, TABLE_LENGTH - 0.06]} />
                 <meshStandardMaterial
-                    color="#9a3412" // Warm polished wood grain center
-                    roughness={0.35}
+                    color="#9a3412" // Polished wood center
+                    roughness={0.3}
                     metalness={0.08}
                 />
             </mesh>
