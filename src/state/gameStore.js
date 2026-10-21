@@ -14,6 +14,13 @@ let state = {
     error: null,
     soloMode: false,
     difficulty: 'medium',
+    targetPoints: 5,
+    scores: { P1: 0, P2: 0 },
+    roundNumber: 1,
+    roundWinner: null,
+    roundStatus: 'PLAYING', // 'PLAYING' | 'ROUND_OVER' | 'MATCH_OVER'
+    selectedPen: 'pinpoint',
+    aiPen: 'all_time_blue',
 }
 
 const listeners = new Set()

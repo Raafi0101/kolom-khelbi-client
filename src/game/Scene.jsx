@@ -9,6 +9,7 @@ import { useGameStore, setState, getState } from '../state/gameStore.js'
 import { sendShot } from '../net/socket.js'
 import { applyShotResult } from '../state/localGame.js'
 import { computeAIShot } from '../ai/computerAI.js'
+import { playFlickSound } from '../audio/soundEffects.js'
 
 const MAX_DRAG_WORLD = 1.0
 const MAX_IMPULSE = 2.5
@@ -31,13 +32,15 @@ export default function Scene() {
     const p2 = useRef(null)
     const drag = useRef(null)
     const lastTurn = useRef(-1)
-    const aiFiredTurn = useRef(-1)
+    const aiFiredRound = useRef({ round: -1, turn: -1 })
     const [aim, setAim] = useState(null)
     const [pending, setPending] = useState(null)
 
+    const isPlayable = state.roundStatus === 'PLAYING' && state.phase === 'IN_PROGRESS'
+
     const isHumanTurn = state.soloMode
-        ? state.phase === 'IN_PROGRESS' && state.currentTurn === 'P1'
-        : state.phase === 'IN_PROGRESS' && state.currentTurn === state.mySlot
+        ? isPlayable && state.currentTurn === 'P1'
+        : isPlayable && state.currentTurn === state.mySlot
 
     const humanSlot = state.soloMode ? 'P1' : state.mySlot
 
@@ -88,6 +91,8 @@ export default function Scene() {
             const dir = delta.normalize()
             const power = Math.min(1, len / MAX_DRAG_WORLD)
             const imp = dir.clone().multiplyScalar(power * MAX_IMPULSE)
+
+            playFlickSound(power)
             d.api.applyImpulse([imp.x, 0, imp.z], [0, 0, 0])
             setPending({ dirX: dir.x, dirZ: dir.z, power, seq: Date.now() })
         }
@@ -103,10 +108,17 @@ export default function Scene() {
 
     // Trigger AI shot in solo mode
     useEffect(() => {
-        if (!state.soloMode || state.phase !== 'IN_PROGRESS' || state.currentTurn !== 'P2') {
+        if (
+            !state.soloMode ||
+            state.phase !== 'IN_PROGRESS' ||
+            state.roundStatus !== 'PLAYING' ||
+            state.currentTurn !== 'P2'
+        ) {
             return
         }
-        if (aiFiredTurn.current === state.turnNumber) {
+
+        const currentRoundKey = `${state.roundNumber}_${state.turnNumber}`
+        if (aiFiredRound.current.key === currentRoundKey) {
             return
         }
 
@@ -115,7 +127,7 @@ export default function Scene() {
             const a2 = p2.current?.api
             if (!a1 || !a2) return
 
-            aiFiredTurn.current = state.turnNumber
+            aiFiredRound.current = { key: currentRoundKey }
 
             const p1Pos = a1.position.get()
             const p2Pos = a2.position.get()
@@ -128,15 +140,17 @@ export default function Scene() {
 
             const impX = shot.dirX * shot.power * MAX_IMPULSE
             const impZ = shot.dirZ * shot.power * MAX_IMPULSE
+
+            playFlickSound(shot.power)
             a2.applyImpulse([impX, 0, impZ], [0, 0, 0])
 
             setPending({ ...shot, seq: Date.now(), soloAI: true })
-        }, 1200)
+        }, 1100)
 
         return () => clearTimeout(timer)
-    }, [state.soloMode, state.phase, state.currentTurn, state.turnNumber, state.difficulty])
+    }, [state.soloMode, state.phase, state.roundStatus, state.currentTurn, state.turnNumber, state.roundNumber, state.difficulty])
 
-    // Wait for physics to settle, then apply local result or send ShotResult to server
+    // Wait for physics to settle, then evaluate round or send ShotResult
     useEffect(() => {
         if (!pending) return
         const iv = setInterval(() => {
@@ -150,7 +164,7 @@ export default function Scene() {
             const lv = Math.hypot(v1[0], v1[1], v1[2]) + Math.hypot(v2[0], v2[1], v2[2])
             const av = Math.hypot(w1[0], w1[1], w1[2]) + Math.hypot(w2[0], w2[1], w2[2])
 
-            // Allow impulse at least 250ms to register in physics simulation before settle check
+            // Allow impulse at least 250ms to develop before settle check
             if (Date.now() - pending.seq > 250 && lv < 0.15 && av < 0.4) {
                 clearInterval(iv)
                 const s = getState()
@@ -199,7 +213,7 @@ export default function Scene() {
         return () => clearInterval(iv)
     }, [pending])
 
-    // Reconcile with server on each new turn or reset positions on solo restart
+    // Reset pens at match/round start or reconcile with multiplayer server
     useEffect(() => {
         if (!p1.current?.api || !p2.current?.api) return
 
@@ -216,7 +230,7 @@ export default function Scene() {
             resetPen(p1, P1_START, 0)
             resetPen(p2, P2_START, Math.PI)
             lastTurn.current = 0
-            aiFiredTurn.current = -1
+            aiFiredRound.current = { round: -1, turn: -1 }
             return
         }
 
@@ -234,7 +248,7 @@ export default function Scene() {
         }
         snap(p1, state.players.P1)
         snap(p2, state.players.P2)
-    }, [state])
+    }, [state.soloMode, state.turnNumber, state.roundNumber, state.players])
 
     return (
         <>
@@ -242,23 +256,25 @@ export default function Scene() {
                 makeDefault
                 target={[0, 0, 0]}
                 enablePan={false}
-                minDistance={1.5}
-                maxDistance={5}
-                maxPolarAngle={Math.PI / 2.2}
+                minDistance={1.6}
+                maxDistance={4.5}
+                maxPolarAngle={Math.PI / 2.3}
                 enabled={!state.dragging}
+                enableDamping
+                dampingFactor={0.06}
             />
             <Table />
             <Pen
                 position={P1_START}
                 rotationY={0}
-                color="#d62828"
+                styleId={state.selectedPen || 'pinpoint'}
                 onReady={(api) => (p1.current = { api })}
                 onPointerDown={onPenDown('P1')}
             />
             <Pen
                 position={P2_START}
                 rotationY={Math.PI}
-                color="#1d4ed8"
+                styleId={state.aiPen || 'all_time_blue'}
                 onReady={(api) => (p2.current = { api })}
                 onPointerDown={onPenDown('P2')}
             />
@@ -275,7 +291,7 @@ function AimArrow({ from, to }) {
     return (
         <mesh position={[mid.x, 0.06, mid.z]} rotation={[0, angle, 0]}>
             <boxGeometry args={[0.02, 0.02, len]} />
-            <meshBasicMaterial color="#fbbf24" />
+            <meshBasicMaterial color="#f59e0b" />
         </mesh>
     )
 }
