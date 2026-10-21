@@ -11,8 +11,9 @@ import { applyShotResult } from '../state/localGame.js'
 import { computeAIShot } from '../ai/computerAI.js'
 import { playFlickSound } from '../audio/soundEffects.js'
 
-const MAX_DRAG_WORLD = 1.0
-const MAX_IMPULSE = 3.2
+// Realistic physics sensitivity: balanced impulse & deliberate drag distance
+const MAX_DRAG_WORLD = 1.35
+const MAX_IMPULSE = 1.95
 const TABLE_BOUND_X = 1.22
 const TABLE_BOUND_Z = 0.72
 const TABLE_MIN_Y = -0.03
@@ -149,7 +150,7 @@ export default function Scene() {
         setState({ dragging: true })
     }
 
-    // Drag move & release
+    // Drag move & release with realistic progressive sensitivity
     useEffect(() => {
         const onMove = (e) => {
             if (!drag.current) return
@@ -165,14 +166,15 @@ export default function Scene() {
             if (!d) return
 
             const end = pickWorld(e.clientX, e.clientY)
-            // Slingshot pull vector: pulling away shoots forward (360 degrees full freedom)
             const delta = d.start.clone().sub(end)
             delta.y = 0
             const len = delta.length()
-            if (len < 0.05) return
+            if (len < 0.06) return
 
             const dir = delta.normalize()
-            const power = Math.min(1, Math.max(0.12, len / MAX_DRAG_WORLD))
+            // Natural progressive power curve: gentle pulls are soft, full pulls are solid
+            const normalized = Math.min(1, Math.max(0, (len - 0.05) / (MAX_DRAG_WORLD - 0.05)))
+            const power = Math.pow(normalized, 1.15) * 0.95 + 0.05
             const imp = dir.clone().multiplyScalar(power * MAX_IMPULSE)
 
             playFlickSound(power)
@@ -336,7 +338,7 @@ export default function Scene() {
 
     return (
         <>
-            {/* Table & Camera are completely FIXED (OrbitControls locked so board never moves) */}
+            {/* Table & Camera are completely FIXED */}
             <OrbitControls
                 makeDefault
                 target={[0, 0, 0]}
@@ -370,66 +372,63 @@ export default function Scene() {
 }
 
 /**
- * 360-Degree Aiming Visualizer:
- * Clear, thick, vibrant trajectory arrow visible under thumbs on mobile phones.
+ * 360-Degree Aiming Visualizer calibrated to realistic power scale
  */
 function AimTrajectoryGuide({ from, to }) {
     const delta = from.clone().sub(to)
     delta.y = 0
     const len = delta.length()
-    if (len < 0.03) return null
+    if (len < 0.04) return null
 
     const dir = delta.clone().normalize()
-    const power = Math.min(1, Math.max(0.15, len / MAX_DRAG_WORLD))
+    const normalized = Math.min(1, Math.max(0, (len - 0.05) / (MAX_DRAG_WORLD - 0.05)))
+    const power = Math.pow(normalized, 1.15) * 0.95 + 0.05
 
-    // Arrow length proportional to power (up to 0.9m)
-    const arrowLen = 0.22 + power * 0.68
+    // Arrow length proportional to realistic power
+    const arrowLen = 0.18 + power * 0.65
     const angle = Math.atan2(dir.x, dir.z)
 
     // Dynamic color based on power
     const color =
-        power < 0.4
-            ? '#22c55e' // Green for light shots
-            : power < 0.75
-            ? '#fbbf24' // Yellow for medium shots
-            : '#ef4444' // Red for max power smash!
+        power < 0.38
+            ? '#22c55e' // Green for controlled, tactical shots
+            : power < 0.72
+            ? '#fbbf24' // Yellow for solid medium hits
+            : '#ef4444' // Red for full power strike
 
-    // Midpoint of the forward arrow shaft
     const shaftMidX = from.x + (dir.x * arrowLen) / 2
     const shaftMidZ = from.z + (dir.z * arrowLen) / 2
 
-    // Tip position for arrowhead
     const tipX = from.x + dir.x * arrowLen
     const tipZ = from.z + dir.z * arrowLen
 
-    // Midpoint of elastic pull string
     const pullMidX = (from.x + to.x) / 2
     const pullMidZ = (from.z + to.z) / 2
     const pullAngle = Math.atan2(to.x - from.x, to.z - from.z)
 
     return (
         <group position={[0, 0.045, 0]}>
-            {/* 1. Forward Trajectory Shaft (Thick for mobile visibility) */}
+            {/* 1. Forward Trajectory Shaft */}
             <mesh position={[shaftMidX, 0, shaftMidZ]} rotation={[0, angle, 0]}>
-                <cylinderGeometry args={[0.018, 0.018, arrowLen, 12]} />
+                <cylinderGeometry args={[0.016, 0.016, arrowLen, 12]} />
                 <meshBasicMaterial color={color} />
             </mesh>
 
             {/* 2. Forward Arrowhead Cone */}
             <mesh position={[tipX, 0, tipZ]} rotation={[0, angle, 0]}>
-                <coneGeometry args={[0.05, 0.10, 16]} />
+                <coneGeometry args={[0.045, 0.09, 16]} />
                 <meshBasicMaterial color={color} />
             </mesh>
 
             {/* 3. Slingshot Pull Line (Behind Pen) */}
             <mesh position={[pullMidX, 0, pullMidZ]} rotation={[0, pullAngle, 0]}>
-                <cylinderGeometry args={[0.008, 0.008, len, 8]} />
+                <cylinderGeometry args={[0.007, 0.007, len, 8]} />
                 <meshBasicMaterial color="rgba(255,255,255,0.7)" transparent opacity={0.7} />
             </mesh>
 
             {/* 4. Glowing Power Ring at Pen Base */}
             <mesh position={[from.x, -0.01, from.z]} rotation={[-Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[0.07, 0.11 + power * 0.04, 24]} />
+                <ringGeometry args={[0.07, 0.10 + power * 0.04, 24]} />
                 <meshBasicMaterial color={color} transparent opacity={0.75} />
             </mesh>
         </group>

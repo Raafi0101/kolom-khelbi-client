@@ -15,21 +15,21 @@ export default function Pen({
     const penStyle = PEN_STYLES[styleId] || PEN_STYLES.pinpoint
     const barrelColor = customColor || penStyle.barrelColor
 
-    // Highly responsive physics body with realistic momentum transfer & smooth slide
+    // Realistic physical pen specs with natural desktop resistance and solid momentum transfer
     const [ref, api] = useBox(() => ({
         mass: 0.32,
         args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
         position,
         rotation: [0, rotationY, 0],
-        material: { friction: 0.08, restitution: 0.82 }, // Low friction slide + high elastic bounce
-        linearDamping: 0.12, // Smooth desktop gliding without abrupt stopping
-        angularDamping: 0.18, // Realistic spin when hit off-center
+        material: { friction: 0.28, restitution: 0.52 }, // Realistic wood-plastic contact
+        linearDamping: 0.24, // Naturally decelerates on wooden desk instead of sliding endlessly
+        angularDamping: 0.32, // Controlled realistic spin
         allowSleep: true,
         sleepSpeedLimit: 0.1,
         sleepTimeLimit: 0.4,
         onCollide: (e) => {
-            const vel = e.contact?.impactVelocity || 1.2
-            playClashSound(Math.min(1, vel / 3.5))
+            const vel = e.contact?.impactVelocity || 0.8
+            playClashSound(Math.min(1, vel / 2.5))
         },
     }))
 

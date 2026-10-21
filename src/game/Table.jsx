@@ -2,12 +2,12 @@ import { useBox } from '@react-three/cannon'
 import { TABLE_WIDTH, TABLE_LENGTH } from './constants.js'
 
 export default function Table() {
-    // Static wooden tabletop with smooth glide
+    // Static wooden tabletop with natural polished desktop friction
     const [ref] = useBox(() => ({
         type: 'Static',
         args: [TABLE_WIDTH, 0.1, TABLE_LENGTH],
         position: [0, -0.05, 0],
-        material: { friction: 0.08, restitution: 0.6 },
+        material: { friction: 0.28, restitution: 0.45 },
     }))
 
     const legHeight = 1.2
@@ -22,7 +22,7 @@ export default function Table() {
                 <boxGeometry args={[TABLE_WIDTH, 0.1, TABLE_LENGTH]} />
                 <meshStandardMaterial
                     color="#854d0e" // Warm teak/walnut wood
-                    roughness={0.35}
+                    roughness={0.4}
                     metalness={0.05}
                 />
             </mesh>
@@ -32,7 +32,7 @@ export default function Table() {
                 <boxGeometry args={[TABLE_WIDTH + 0.04, 0.09, TABLE_LENGTH + 0.04]} />
                 <meshStandardMaterial
                     color="#451a03" // Deep mahogany border
-                    roughness={0.45}
+                    roughness={0.5}
                     metalness={0.1}
                 />
             </mesh>
@@ -42,7 +42,7 @@ export default function Table() {
                 <boxGeometry args={[TABLE_WIDTH - 0.06, 0.002, TABLE_LENGTH - 0.06]} />
                 <meshStandardMaterial
                     color="#9a3412" // Polished wood center
-                    roughness={0.3}
+                    roughness={0.35}
                     metalness={0.08}
                 />
             </mesh>

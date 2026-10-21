@@ -3,7 +3,7 @@
  * Mimics human pen-fight tactics:
  * - Edge detection & tactical push direction
  * - Off-center spin hits for maximum knockout torque
- * - Power regulation based on distance and table boundary proximity
+ * - Controlled, natural power scaling
  */
 
 const DIFFICULTY_CONFIG = {
@@ -36,8 +36,8 @@ export function computeAIShot({ attackerPos, targetPos, difficulty = 'medium' })
     let targetZ = targetPos[2]
 
     if (config.spinHitProbability > 0 && Math.random() < config.spinHitProbability) {
-        // Decide whether to strike top end or bottom end to spin towards nearest boundary
-        const aimOffset = targetZ >= 0 ? 0.12 : -0.12
+        // Strike top end or bottom end to spin towards nearest boundary
+        const aimOffset = targetZ >= 0 ? 0.11 : -0.11
         targetZ += aimOffset
     }
 
@@ -50,7 +50,7 @@ export function computeAIShot({ attackerPos, targetPos, difficulty = 'medium' })
         }
         if (Math.abs(targetPos[2]) > 0.3) {
             // Player is close to top/bottom cliff -> angle strike towards that edge
-            const edgeDir = targetPos[2] > 0 ? 0.08 : -0.08
+            const edgeDir = targetPos[2] > 0 ? 0.07 : -0.07
             targetZ += edgeDir
         }
     }
@@ -63,9 +63,8 @@ export function computeAIShot({ attackerPos, targetPos, difficulty = 'medium' })
     const baseDirX = dx / distance
     const baseDirZ = dz / distance
 
-    // Base power calibrated to desktop table distance
-    // Scale power with distance: close distance needs sharp snap, far distance needs high velocity
-    const basePower = Math.min(Math.max(distance / 1.15, 0.45), 0.92)
+    // Base power calibrated to realistic table physics (0.35 to 0.88)
+    const basePower = Math.min(Math.max(distance / 1.35, 0.35), 0.88)
 
     // Apply difficulty noise
     const angleNoise = (Math.random() * 2 - 1) * config.maxAngleNoise
@@ -83,7 +82,7 @@ export function computeAIShot({ attackerPos, targetPos, difficulty = 'medium' })
 
     // Modulate power
     const rawPower = basePower * (1 + pNoise)
-    const power = Math.min(Math.max(rawPower, 0.25), 1.0)
+    const power = Math.min(Math.max(rawPower, 0.20), 0.95)
 
     return { dirX, dirZ, power }
 }
