@@ -17,13 +17,13 @@ export default function Pen({
 
     // Realistic physical pen specs with natural desktop resistance and solid momentum transfer
     const [ref, api] = useBox(() => ({
-        mass: 0.32,
+        mass: 0.6, // increased weight for realistic slide
         args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
         position,
         rotation: [0, rotationY, 0],
-        material: { friction: 0.35, restitution: 0.05 }, // realistic table interaction, low bounce
-        linearDamping: 0.2, // moderate deceleration
-        angularDamping: 0.08, // low damping for noticeable spin
+        material: { friction: 0.5, restitution: 0.05 }, // higher friction, low bounce
+        linearDamping: 0.35, // stronger deceleration
+        angularDamping: 0.2, // more spin damping
         angularFactor: [0, 1, 0], // only yaw rotation (around Y axis)
     linearFactor: [1, 0, 1], // constrain vertical movement
     allowSleep: true,

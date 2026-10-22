@@ -12,8 +12,8 @@ import { computeAIShot } from '../ai/computerAI.js'
 import { playFlickSound } from '../audio/soundEffects.js'
 
 // Realistic physics sensitivity: balanced impulse & deliberate drag distance
-const MAX_DRAG_WORLD = 1.35
-const MAX_IMPULSE = 1.95
+const MAX_DRAG_WORLD = 0.85 // shorter pull distance for realistic control
+const MAX_IMPULSE = 1.2   // lower impulse so light touches don't send pen flying
 const TABLE_BOUND_X = 1.22
 const TABLE_BOUND_Z = 0.72
 const TABLE_MIN_Y = -0.03
