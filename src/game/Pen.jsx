@@ -17,6 +17,25 @@ export default function Pen({
 
     // Realistic physical pen specs with natural desktop resistance and solid momentum transfer
     const [ref, api] = useBox(() => ({
+        // Heavier pen for realistic slide
+        mass: 0.8,
+        args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
+        position,
+        rotation: [0, rotationY, 0],
+        // High friction and near‑zero restitution to keep pens glued to the wood surface
+        material: { friction: 0.85, restitution: 0.02 },
+        // Damping to smooth motion after impact
+        linearDamping: 0.45,
+        angularDamping: 0.3,
+        // Constrain rotation to yaw only and lock vertical movement
+        angularFactor: [0, 1, 0],
+        linearFactor: [1, 0, 1],
+        allowSleep: false,
+        onCollide: (e) => {
+            const vel = e.contact?.impactVelocity || 0.8;
+            playClashSound(Math.min(1, vel / 2.5));
+        },
+    }))
         mass: 0.6, // increased weight for realistic slide
         args: [PEN_LENGTH, PEN_RADIUS * 2, PEN_RADIUS * 2],
         position,

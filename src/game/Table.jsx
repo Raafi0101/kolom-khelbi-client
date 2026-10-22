@@ -7,6 +7,7 @@ export default function Table() {
         type: 'Static',
         args: [TABLE_WIDTH, 0.1, TABLE_LENGTH],
         position: [0, -0.05, 0],
+        material: { friction: 0.85, restitution: 0.02 }, // high friction, near‑zero bounce
         material: { friction: 0.35, restitution: 0.2 }, // Adjusted for realistic desk interaction
     }))
 
