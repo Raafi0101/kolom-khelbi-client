@@ -184,6 +184,7 @@ export default function Lobby() {
                                     { id: 'easy', label: 'Beginner', icon: '🟢' },
                                     { id: 'medium', label: 'Pro Fighter', icon: '🟡' },
                                     { id: 'hard', label: 'Master AI', icon: '🔴' },
+                                    { id: 'expert', label: 'Grandmaster', icon: '⚫' },
                                 ].map((d) => (
                                     <button
                                         key={d.id}
